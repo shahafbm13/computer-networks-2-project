@@ -35,7 +35,7 @@ class Switch:
             self.mac_table[found_entry][2] = port
             self.mac_table[found_entry][3] = time.time()  # updates TTL
             # if print_flag:
-            #     print(f'updated entry for {mac_address} on port {port}')
+            #     print(updated entry for {mac_address} on port {port}')
         else:  # mac address does not exist in table
             if None in self.mac_table:  # there is an empty entry
                 self.mac_table[self.mac_table.index(None)] = [True, mac_address, port, time.time()]
