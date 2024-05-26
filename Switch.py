@@ -14,7 +14,6 @@ class Switch:
         if port < 0 or port > self.number_of_io_ports:
             print("Invalid port number")
         else:
-            print(link)
             self.io_ports[port] = link
             self.used_ports += 1
 
