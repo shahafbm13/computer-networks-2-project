@@ -87,7 +87,7 @@ def create_message_switches(main_timeline, start_time):
                                                                        , message_size=random_message_size,
                                                                        message_id=event.message_id,
                                                                        schedule_time=event.schedule_time,
-                                                                       print_flag=print_flag)
+                                                                       start_time=start_time,print_flag=print_flag)
         for switch in switch_list:
             for link in link_list:
                 if (link.host1 == scheduling_host and link.host2 == switch) or (
