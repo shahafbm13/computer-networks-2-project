@@ -3,14 +3,8 @@ class Timeline:
         self.timeline = []
 
     def create_timeline(self, host_list, id):
-        '''
-        loops over all hosts and creates events for each host
-        after that, loops over all hosts, and then their created events,
-        and appends them to the timeline
-        finally, sorts the timeline by the schedule time and tie breaks with
-        message ID
-        '''
-
+        # creates a timeline by creating events for each host in the host list
+        # and then appending the events to the timeline, then sorting the timeline
         for host in host_list:
             host.create_events(id, host_list)
 

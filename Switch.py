@@ -34,29 +34,16 @@ class Switch:
             self.mac_table[found_entry][0] = 'True'
             self.mac_table[found_entry][2] = port
             self.mac_table[found_entry][3] = time.time()  # updates TTL
-            # if print_flag:
-            #     print(updated entry for {mac_address} on port {port}')
         else:  # mac address does not exist in table
             if None in self.mac_table:  # there is an empty entry
                 self.mac_table[self.mac_table.index(None)] = [True, mac_address, port, time.time()]
-                # if print_flag:
-                #     print(f'no mac address found, added entry for {mac_address} which came from {message.src_address}')
             else:  # replace the oldest entry
                 oldest_entry = self.get_oldest_entry()
                 self.mac_table[self.mac_table.index(oldest_entry)] = [True, mac_address, port, time.time()]
-                # if print_flag:
-                #     print(
-                #         f'no mac address found, replacing {oldest_entry[1]} for {mac_address} on port {self.io_ports.index(port)}')
             if print_flag:
                 self.print_mac_table(link_list)
             return "flood"
         return "added"
-
-    # check if entry for MAC address already exists
-    # if it does, update the entry
-    # if it does not, check if there is an empty entry
-    # if there is, add the entry
-    # if there is not, replace the oldest entry
 
     def check_TTL(self, entry):
         if abs(time.time() - entry[3]) >= entry[3]:
@@ -91,13 +78,10 @@ class Switch:
         else:
             return False
 
-    # NEED TO FIX SENDING MESSAGES FROM SWITCH TO SWITCH AND FLOODING BETWEEN COMPUTERS
-
     def receive_message(self, message, link, host_list, switch_list, link_list, print_flag=False):
         answer = self.add_to_table(message.src_address, link, message, link_list, print_flag)
         if message.src_address in switch_list:
             self.receive_message_from_switch(message, link, host_list, link_list, print_flag=print_flag)
-        # need to send if no flooding
         target_host = host_list[message.dst_address]
         if answer == "flood":
             self.flooding(host_list, message, switch_list)

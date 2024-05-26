@@ -14,8 +14,8 @@ switch_list = []
 total_id = 0
 print_flag = True
 
+np.random.seed(0)
 
-# np.random.seed(0)
 
 def create_main_timeline(main_timeline, number_of_packets):
     global total_id
@@ -256,47 +256,6 @@ def main():
         if print_flag:
             for switch in switch_list:
                 switch.print_mac_table(link_list)
-
-
-# def main():
-#     # choice = input("Enter Question Number for simulation:  ")
-#     # number_of_hosts = int(input("Enter number of hosts: "))
-#     # number_of_packets = int(input("Enter number of packets to simulate per host: "))
-#     choice = "B2"
-#     number_of_packets = 10
-#     # create_hosts(number_of_hosts,number_of_packets)
-#     # create_links(len(host_list))
-#
-#     if choice == "B2":
-#         # link_ids, switch_ids, number_of_ports_one, number_of_ports_two = create_hosts_for_switches()
-#         host_list.append(Host.Host(0, 2, 0))
-#         host_list.append(Host.Host(1, 3, 1))
-#         switch_ids = 2
-#         number_of_ports_one = 1
-#         number_of_ports_two = 1
-#         link_ids = 4
-#         create_switches(switch_ids, number_of_ports_one, number_of_ports_two)
-#         create_links_for_switches(link_ids, 1, 1)
-#
-#
-#         for switch in switch_list:
-#             for link in link_list:
-#                 for i in range(number_of_ports_one):
-#                     if link.host1 == host_list[i] and link.host2.address == switch.address:
-#                         switch.initialize_port(i, link)
-#                 for j in range(number_of_ports_two):
-#                     if link.host1 == host_list[j + 1] and link.host2.address == switch.address:
-#                         switch.initialize_port(j, link)
-#         switch_list[0].initialize_port(number_of_ports_one, link_list[-1])
-#         switch_list[1].initialize_port(number_of_ports_two, link_list[-1])
-#         main_timeline = Timeline.Timeline()
-#         main_timeline.timeline.append(Event.Event(1, "Create", 1, 0, 10))
-#         main_timeline.timeline.append(Event.Event(1, "Create", 1, 0, 10))
-#         start_time = time.time()
-#         create_message_switches(main_timeline, start_time)
-#         if print_flag:
-#             for switch in switch_list:
-#                 switch.print_mac_table(link_list)
 
 
 main()
