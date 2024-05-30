@@ -7,7 +7,7 @@ class Switch:
         self.address = address
         self.number_of_io_ports = number_of_io_ports
         self.io_ports = [None] * number_of_io_ports  # list of links
-        self.mac_table = [None] * 10  # list of MAC addresses
+        self.mac_table = [None]  * 3  # list of MAC addresses
         self.used_ports = 0
 
     def initialize_port(self, port, link):

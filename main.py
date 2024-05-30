@@ -16,7 +16,6 @@ print_flag = True
 
 np.random.seed(0)
 
-
 def create_main_timeline(main_timeline, number_of_packets):
     global total_id
     for host in host_list:
@@ -25,14 +24,14 @@ def create_main_timeline(main_timeline, number_of_packets):
 
 
 # noinspection DuplicatedCode
-def create_message(main_timeline, start_time):
+def run_timeline(main_timeline, start_time):
     enough_time_passed = False
     for event in main_timeline.timeline:
         while enough_time_passed is False:  # check if event should be executed
             if event.schedule_time < start_time:
                 enough_time_passed = True  # to exit loop
         enough_time_passed = False  # reset flag for next iteration
-        if time.time() - start_time >= 10:
+        if time.time() - start_time >= 5:
             print("Simulation took too long. Exiting.")
             return -1
         random_message_size = np.random.randint(64, 1518)
@@ -69,7 +68,7 @@ def get_switch_by_hosts(scheduling_host, target_host):
 
 
 # noinspection DuplicatedCode
-def create_message_switches(main_timeline, start_time):
+def run_timeline_switch(main_timeline, start_time):
     # Function to create messages for switches according to the main timeline and start time
     enough_time_passed = False
     for event in main_timeline.timeline:
@@ -87,7 +86,7 @@ def create_message_switches(main_timeline, start_time):
                                                                        , message_size=random_message_size,
                                                                        message_id=event.message_id,
                                                                        schedule_time=event.schedule_time,
-                                                                       start_time=start_time,print_flag=print_flag)
+                                                                       start_time=start_time, print_flag=print_flag)
         for switch in switch_list:
             for link in link_list:
                 if (link.host1 == scheduling_host and link.host2 == switch) or (
@@ -191,16 +190,16 @@ def main():
         host_list.append(Host.Host(0, 2, total_id))
         host_list.append(Host.Host(1, 2, total_id))
         link_list.append(Link.Link(2, host_list[0], host_list[1],
-                                   transmission_rate=10, prop_delay=0, error_rate=0))
+                                   transmission_rate=1000, prop_delay=0, error_rate=0))
 
         main_timeline = Timeline.Timeline()
         create_main_timeline(main_timeline, number_of_packets)
         start_time = time.time()
-        term = create_message(main_timeline, start_time)
+        term = run_timeline(main_timeline, start_time)
         if term != -1:
             send_rest_of_queue(start_time)
-        if print_flag:
-            simulation_end(number_of_packets)
+        # if print_flag:
+        simulation_end(number_of_packets)
 
     if choice == "B1":
         host_list.append(Host.Host(0, 2, total_id))
@@ -226,7 +225,7 @@ def main():
         main_timeline = Timeline.Timeline()
         create_main_timeline(main_timeline, number_of_packets)
         start_time = time.time()
-        create_message_switches(main_timeline, start_time)
+        run_timeline_switch(main_timeline, start_time)
         send_rest_of_queue(start_time)
         if print_flag:
             for switch in switch_list:
@@ -251,12 +250,11 @@ def main():
         main_timeline = Timeline.Timeline()
         create_main_timeline(main_timeline, number_of_packets)
         start_time = time.time()
-        create_message_switches(main_timeline, start_time)
+        run_timeline_switch(main_timeline, start_time)
         send_rest_of_queue(start_time)
         if print_flag:
             for switch in switch_list:
                 switch.print_mac_table(link_list)
-
 
 
 main()

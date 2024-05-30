@@ -19,6 +19,7 @@ class Host:
 
     def create_message(self, src_address, dest_address, message_size,
                        message_id, schedule_time, start_time, print_flag=False):
+
         message = Message.Message(message_id, src_address, dest_address,
                                   message_size, start_time)
         message.schedule_time = schedule_time
@@ -42,7 +43,7 @@ class Host:
                 del message
 
     def create_timeline(self, number_of_packets):
-        timeline = np.random.exponential(1, size=number_of_packets)
+        timeline = np.random.exponential(10, size=number_of_packets)
         self.timeline = np.cumsum(timeline)
 
     def create_events(self, object_id, host_list):
@@ -59,6 +60,6 @@ class Host:
             print(f'Host <{self.address}> received <{self.total_rec}> bytes in <{self.packets_rec}> packets')
 
     def print_average_stats(self, print_flag, number_of_hosts):
-        if print_flag:
-            print(f'Host <{self.address}> sent <{self.total_sent / number_of_hosts}> bytes per packet')
-            print(f'Host <{self.address}> received <{self.total_rec / number_of_hosts}> bytes per packet')
+        # if print_flag:
+        print(f'Host <{self.address}> sent <{self.total_sent / self.packets_sent}> bytes per packet')
+        print(f'Host <{self.address}> received <{self.total_rec /  self.packets_sent}> bytes per packet')
