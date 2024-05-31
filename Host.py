@@ -30,7 +30,7 @@ class Host:
 
         return message
 
-    def receive_message(self, message, link, print_flag=False):
+    def receive_message(self, message, link, print_flag=False,start_time=0):
         if message.message_type == "Data":
             if message.dst_address == self.address:
                 self.total_rec += message.message_size
@@ -63,3 +63,6 @@ class Host:
         # if print_flag:
         print(f'Host <{self.address}> sent <{self.total_sent / self.packets_sent}> bytes per packet')
         print(f'Host <{self.address}> received <{self.total_rec /  self.packets_sent}> bytes per packet')
+
+    def get_id(self):
+        return self.address
