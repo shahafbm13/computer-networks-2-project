@@ -1,0 +1,40 @@
+comp network lab 2 questions
+
+no problem with sending msgs after creation
+
+links should not have queues, move it to switches
+
+
+how to count HoL blocking
+when packet suppoused to send but cant, check next packet to send
+
+
+fifo implementation - search for earliest arrival time between top of queues
+
+
+
+switch receiving msgs:
+add to table
+if not flood:
+	put msg in appropriate queue
+	create msg sending event and put it in a seperate sending timeline
+	
+if flood:
+	duplicate msgs
+	for each msg duplicated:
+		if link free:
+			send
+		if link not free:
+			put in head of respective queue and timeline with same scheduling time as original msg
+
+
+switch sending msgs:
+
+
+
+
+todo:
+update receiving msgs
+add sending msg list
+add check for sending msg queue
+add sending event creation
