@@ -33,7 +33,8 @@ switch sending msgs:
 
 update flood:
 done - find sending host
-done - duplicate original message and put duplicates in rest of queues
+input done, need to do output - duplicate original message and put duplicates in same queue
+
 done - create sending events for new messages, place them in timeline and sort it
 
 
@@ -41,7 +42,7 @@ todo:
 done - update receiving msgs
 add check for sending msg queue
 add sending event creation
-
+add receiving msg not in flood
 
 sending event:
 find sending switch
