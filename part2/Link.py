@@ -17,9 +17,9 @@ class Link:
         dst_host = host_list[message.dst_address]
         dst_host.receive_message(message, self, print_flag,start_time=start_time)
 
-    def send_message_to_switch(self, message, target_switch, host_list, switch_list, link_list, print_flag=False,start_time = 0):
+    def send_message_to_switch(self, message, target_switch, host_list, switch_list, link_list,main_timeline, print_flag=False,start_time = 0):
         # Send a message to a target switch
-        target_switch.receive_message(message, self, host_list, switch_list, link_list, print_flag,start_time=start_time)
+        target_switch.receive_message(message, self, host_list, switch_list, link_list,main_timeline, print_flag,start_time=start_time)
 
     def send_message_from_switch(self, message, target_host, print_flag=False,start_time= 0):
         # Send a message from a switch to a target host

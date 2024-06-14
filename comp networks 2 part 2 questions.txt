@@ -31,10 +31,43 @@ if flood:
 switch sending msgs:
 
 
+update flood:
+done - find sending host
+done - duplicate original message and put duplicates in rest of queues
+done - create sending events for new messages, place them in timeline and sort it
 
 
 todo:
-update receiving msgs
-add sending msg list
+done - update receiving msgs
 add check for sending msg queue
 add sending event creation
+
+
+sending event:
+find sending switch
+find curr message
+find correct link
+if link is busy:
+	cant_send flag=true ????
+	calculate HoL blocking
+	place curr message event right after switches last departure time
+
+	
+if link is not busy:
+    remove from queue
+	send message
+	update departure times ????
+
+
+
+calculate HoL blocking:
+find top of queues and sort by scheduling time
+find curr_message from top of queues
+find next_message_from_top_of_queues from top of queues
+find curr_queue
+for message in curr_queue:
+	if message.scheduling_time < next_message_from_top_of_queues.scheduling_time:
+	    CHECK IF LINK IS FREE ??????
+		total_hol_time +=1
+	else:
+		break
