@@ -12,7 +12,8 @@ link_list = []
 switch_list = []
 
 total_id = 0
-print_flag = False
+print_flag = True
+time_limit = False
 queue_type = "input"
 
 np.random.seed(0)
@@ -74,63 +75,138 @@ def get_switch_by_hosts(scheduling_host, target_host):
 # noinspection DuplicatedCode
 def run_timeline_switch(main_timeline, start_time):
     # Function to create messages for switches according to the main timeline and start time
+    message_list = []
     enough_time_passed = False
     for event in main_timeline.timeline:
         while enough_time_passed is False:  # check if event should be executed
             if event.schedule_time < start_time:
                 enough_time_passed = True  # to exit loop
         enough_time_passed = False  # reset flag for next iteration
-        if time.time() - start_time >= 10:
-            print("Simulation took too long. Exiting.")
-            return -1
+        if time_limit:
+            if time.time() - start_time >= 10:
+                print("Simulation took too long. Exiting.")
+                return -1
         if event.event_type == "create":
             random_message_size = np.random.randint(64, 1518)
             scheduling_host = host_list[int(event.scheduling_object_id)]
             target_host = host_list[event.target_object_id]
+            event.message_id = len(message_list)
             message = host_list[event.scheduling_object_id].create_message(scheduling_host.address, target_host.address,
                                                                            message_size=random_message_size,
                                                                            message_id=event.message_id,
                                                                            schedule_time=event.schedule_time,
                                                                            start_time=start_time, print_flag=print_flag)
+            message_list.append(message)
             for switch in switch_list:
                 for link in link_list:
                     if (link.host1 == scheduling_host and link.host2 == switch) or (
                             link.host2 == scheduling_host and link.host1 == switch):
                         if link.is_link_busy(event.schedule_time, random_message_size):
                             scheduling_host.host_buffer.put(message)
-                            if print_flag:
-                                print(f'Host <{scheduling_host.address}> added message to buffer')
-
-
                         else:  # link is not busy
                             if scheduling_host.host_buffer.empty():
-                                link.send_message_to_switch(message, switch, host_list, switch_list, link_list, print_flag,
-                                                            start_time)
-                                link.time_sent = time.time()
+                                link.send_message_to_switch_part_2(message, switch, host_list, switch_list, link_list,
+                                                                   print_flag,
+                                                                   start_time)
+                                link.time_sent = time.time() - start_time
 
                             else:
                                 scheduling_host.host_buffer.put(message)
                                 queued_message = scheduling_host.host_buffer.get()
-                                link.send_message_to_switch(queued_message, switch, host_list, switch_list, link_list,
-                                                            print_flag, start_time)
-                                link.time_sent = time.time()
-        else: # event type is send
+                                link.send_message_to_switch_part_2(queued_message, switch, host_list, switch_list,
+                                                                   link_list,
+                                                                   print_flag, start_time)
+                                link.time_sent = time.time() - start_time
+            next_message_to_send, sending_switch = check_queues_for_earliest()
+            if next_message_to_send is not None:
+                sending_switch.send_message_to_host_part_2(next_message_to_send, link_list, host_list, start_time,
+                                                           print_flag)
 
-            NEED TO ADD HANDLING MESSAGE RECIEVING TO QUEUES AND SENDING
 
+def check_queues_for_earliest():
+    for switch in switch_list:
+        top_of_queues = []
+        if queue_type == "input":
+            for queue in switch.switch_queues:
+                for i in range(len(queue)):
+                    top_of_queues.append(queue[i])
+            if len(top_of_queues) == 0:
+                return None, switch
+            earliest_message = min(top_of_queues, key=lambda x: x.schedule_time)
+            return earliest_message, switch
 
 
 def send_rest_of_queue(start_time):
     for curr_host in host_list:
         while not curr_host.host_buffer.empty():
-            if time.time() - start_time >= 10:
-                print("Simulation took too long. Exiting.")
-                break
+            if time_limit:
+                if time.time() - start_time >= 10:
+                    print("Simulation took too long. Exiting.")
+                    break
             curr_link = find_link(curr_host)
             if curr_link.is_link_busy(time.time() - start_time, curr_host.host_buffer.queue[0].message_size):
                 queued_message = curr_host.host_buffer.get()
                 curr_link.send_message(queued_message, host_list, print_flag, start_time)
-                curr_link.time_sent = time.time()
+                curr_link.time_sent = time.time() - start_time
+
+
+def send_rest_of_queue_part_2(start_time):
+    amount_of_messages_in_buffer = 0
+    messages_in_switch = 0
+    for host in host_list:
+        amount_of_messages_in_buffer += len(host.host_buffer.queue)
+    for switch in switch_list:
+        for queue in switch.switch_queues:
+            messages_in_switch += len(queue)
+    print(f'Amount of messages in buffers at start: {amount_of_messages_in_buffer}')
+    while amount_of_messages_in_buffer > 0 or messages_in_switch > 0:
+        for switch in switch_list:
+            if messages_in_switch > 0:
+                earliest_message, sending_switch = check_queues_for_earliest()
+                if earliest_message is not None:
+                    curr_link = [link for link in link_list if link.host1.address == earliest_message.src_address][0]
+                    if not curr_link.is_link_busy(time.time() - start_time, earliest_message.message_size):
+                        if print_flag:
+                            print(f'sending message {earliest_message.message_id} of size {earliest_message.message_size} to host {earliest_message.dst_address}')
+                        message_still_in_switch = sending_switch.send_message_to_host_part_2(earliest_message,
+                                                                                             link_list, host_list,
+                                                                                             start_time,
+                                                                                             print_flag)
+                        if message_still_in_switch:
+                            messages_in_switch += 1
+                        messages_in_switch -= 1
+                    else:  # link is busy
+                        sending_switch.calculate_hol_time(earliest_message, curr_link.host1.address)
+                        # NEED TO CHECK HOL BLOCKING
+                else:  # no messages in queues
+                    break
+        if amount_of_messages_in_buffer > 0:
+            earliest_message_from_buffer = find_earliest_from_buffer()
+            if earliest_message_from_buffer is not None:
+                curr_link = [link for link in link_list if
+                             link.host1.address == earliest_message_from_buffer.src_address][0]
+                curr_host = curr_link.host1
+                if not curr_link.is_link_busy(time.time() - start_time, earliest_message_from_buffer.message_size):
+                    curr_link.send_message_to_switch_part_2(earliest_message_from_buffer, curr_link.host2, host_list,
+                                                            switch_list, link_list, print_flag, start_time)
+                    curr_link.time_sent = time.time() - start_time
+                    curr_host.host_buffer.get()
+                    amount_of_messages_in_buffer -= 1
+                    messages_in_switch += 1
+                    if print_flag:
+                        for host in host_list:
+                            print(
+                                f'host {host.address} has a {len(host.host_buffer.queue)} messages in buffer')
+
+
+def find_earliest_from_buffer():
+    temp = []
+    for host in host_list:
+        if not host.host_buffer.empty():
+            temp.append(host.host_buffer.queue[0])
+    if len(temp) == 0:
+        return None
+    return min(temp, key=lambda x: x.schedule_time)
 
 
 def find_link(host):
@@ -330,16 +406,18 @@ def plot_B2_graph(switch_list, link_list, host_list, number_of_ports_one, number
     plt.show()
 
 
-
 def main():
     # Main function to initialize and run the simulation
-    choice = input("Enter Question Number for simulation (A/B1/B2):  ").upper()
-    number_of_packets = int(input("Enter number of packets to simulate per host: "))
+    # choice = input("Enter Question Number for simulation (A/B1/B2):  ").upper()
+    # number_of_packets = int(input("Enter number of packets to simulate per host: "))
+    choice = 'B1'
+    number_of_packets = 3
+
     if choice == "A":
         host_list.append(Host.Host(0, 2, total_id))
         host_list.append(Host.Host(1, 2, total_id))
         link_list.append(Link.Link(2, host_list[0], host_list[1],
-                                   transmission_rate=10, prop_delay=2, error_rate=0))
+                                   transmission_rate=1000, prop_delay=2, error_rate=0))
 
         main_timeline = Timeline.Timeline()
         create_main_timeline(main_timeline, number_of_packets)
@@ -354,7 +432,7 @@ def main():
         host_list.append(Host.Host(0, 2, total_id))
         host_list.append(Host.Host(1, 2, total_id))
         host_list.append(Host.Host(2, 2, total_id))
-        switch_list.append(Switch.Switch(3, 3))
+        switch_list.append(Switch.Switch(3, 3, "input"))
         link_list.append(Link.Link(4, host_list[0], switch_list[0],
                                    transmission_rate=1000, prop_delay=0, error_rate=0))
         link_list.append(Link.Link(5, host_list[1], switch_list[0],
@@ -375,12 +453,14 @@ def main():
         create_main_timeline(main_timeline, number_of_packets)
         start_time = time.time()
         run_timeline_switch(main_timeline, start_time)
-        send_rest_of_queue(start_time)
+        send_rest_of_queue_part_2(start_time)
         if print_flag:
             for switch in switch_list:
                 switch.print_mac_table(link_list)
+                print(f"\nTotal HoL blocking times for switch {switch.address}: {switch.total_hol_time}")
+
         # G = build_AND_plot_B1_graph(switch_list,link_list,host_list,icons_list)
-        plot_graph_B1(switch_list, link_list, host_list)
+        # plot_graph_B1(switch_list, link_list, host_list)
 
     if choice == "B2":
         link_ids, switch_ids, number_of_ports_one, number_of_ports_two = create_hosts_for_switches()
@@ -407,9 +487,6 @@ def main():
             for switch in switch_list:
                 switch.print_mac_table(link_list)
         plot_B2_graph(switch_list, link_list, host_list, number_of_ports_one, number_of_ports_two)
-
-
-
 
 
 main()

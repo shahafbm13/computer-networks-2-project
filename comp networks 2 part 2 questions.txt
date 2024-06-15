@@ -72,3 +72,51 @@ for message in curr_queue:
 		total_hol_time +=1
 	else:
 		break
+----------------------------------------------------------------------------------------------------------------
+after message created
+go over switch queue, find the earliest message
+check if dst is known to switch
+if known:
+    if link is free:
+        send to dst
+    if link is not free:
+        continue to next create event
+if not known:
+    flood:
+        find hosts that are not src of message
+        for each valid host:
+            try to send message:
+                if link is free:
+                    send
+                if link is not free:
+                    put in head of respective queue
+
+
+
+sending from host to switch:
+link sends from host to switch
+switch receives message:
+    add to correct queue
+
+
+send_rest_of_buffers_and_queues:
+while there are messages in queues or buffers:
+    for each switch:
+        find earliest message in top of queues
+        try to send earliest message:
+            if link is free:
+                send message to dst host
+            if link is not free:
+                calculate hol blocking
+                continue to next buffer message
+    for each host:
+        find earliest message from buffers
+        try to send earliest message:
+            if link is free:
+                send message to switch
+            if link is not free:
+                continue to next switch message
+
+----------------------------------------------------------------------------------------------------------------
+
+
