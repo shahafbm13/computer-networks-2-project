@@ -17,7 +17,7 @@ class Host:
         self.events = []
         self.packets_sent = 0
         self.packets_rec = 0
-        self.host_buffer = queue.Queue()
+        self.host_buffer = []
         self.random_dest_list=[]
 
 
@@ -31,17 +31,17 @@ class Host:
         self.total_sent += message.message_size
         self.packets_sent += 1
         if print_flag:
-            print(f'Host <{self.address}> created an L2 Message (size:<{message.message_size}>)')
+            print(f'Host <{self.address}> created an L2 Message with destination <{message.dst_address}> (size:<{message.message_size}>)')
 
         return message
 
-    def receive_message(self, message, link, print_flag=False,start_time=0):
+    def receive_message(self, message, link, print_flag=False,curr_time=0):
         if message.message_type == "Data":
             if message.dst_address == self.address:
                 self.total_rec += message.message_size
                 self.packets_rec += 1
                 if print_flag:
-                    time_destroyed = time.time() - message.start_time
+                    time_destroyed = curr_time
                     print(
                         f'Host <{self.address}> destroyed an L2 Message (size:<{message.message_size}>) at time'
                         f' <{time_destroyed}>')
@@ -51,9 +51,9 @@ class Host:
         timeline = np.random.exponential(1/1000, size=number_of_packets)
         self.timeline = np.cumsum(timeline)
 
-    def create_events(self, object_id, host_list):
+    def create_events(self, object_id, destination_host_list):
         for time_slot in self.timeline:
-            temp_host_list = [host for host in host_list if host.address != self.address]
+            temp_host_list = [host for host in destination_host_list if host.address != self.address]
             dst_host = np.random.choice(temp_host_list)
             event = Event.Event(time_slot, "create", self.address, dst_host.address, object_id)
             self.events.append(event)

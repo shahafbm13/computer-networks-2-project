@@ -12,6 +12,86 @@ when packet suppoused to send but cant, check next packet to send
 fifo implementation - search for earliest arrival time between top of queues
 
 
+----------------------------------------------------------------------------------------------------------------
+make new main state for part 2:
+    create source hosts
+    create destination hosts
+    create switch
+    create links
+    initialize switch ports
+    create switch queues
+    create main timeline
+    run main loop
+    run rest of queue
+    print stats
+
+main loop:
+#in each run of main loop, check if there are packets in switch and try to deal with
+if create:
+
+
+
+hol init, if link not free:
+add to switch hol blocker[queue_number] = [blocking_message, blocking_start_time]
+
+hol calc, when msg was sent from switch:
+if hol blocker[queue_number] != None:
+    total_hol_time += current_time - blocking_start_time
+^^^# this is like event.schedule_time - hol_blocker[queue_number][1] ^^^
+
+    hol blocker[queue_number] = None
+
+
+send rest of buffers and queues:
+while there_are_messeges in queues or buffers:
+    if switch flag:
+        for each switch:
+            find earliest message in top of queues
+            (if no msgs in queues, break from loop)
+            if link is free:
+                send message to dst host
+                update link.time_sent
+                calc_hol_blocking
+            if link is not free:
+                calculate hol blocking
+
+    if host flag:
+        for each host:
+            find earliest message from buffers
+            (if no msgs in queues, break from loop and update host flag)
+            if link is free:
+                send message to switch
+                update link.time_sent
+                update switch flag
+                break from host loop
+            if link is not free:
+                break from host loop
+
+
+
+
+
+
+
+
+todo -
+done - create virtual queues
+done - run main loop - implement virtual queues
+done - receive_message_part_2 - implement virtual queues
+done - flooding_part_2 - deal with virtual queue
+done - hol blocking start for virtual queues
+done - hol blocking calculation for virtual queues
+done - send rest of buffers and queues - implement virtual queues
+done - print stats - implement virtual queues
+
+remove messages in buffer print
+
+
+
+----------------------------------------------------------------------------------------------------------------
+BELOW IS WRONG - DO NOT USE
+----------------------------------------------------------------------------------------------------------------
+
 
 switch receiving msgs:
 add to table
@@ -118,5 +198,39 @@ while there are messages in queues or buffers:
                 continue to next switch message
 
 ----------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
