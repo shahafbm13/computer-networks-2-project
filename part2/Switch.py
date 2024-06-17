@@ -121,6 +121,7 @@ class Switch:
             if self.queue_type == "input":
                 self.switch_queues[sending_host_id].appendleft(message)
             elif self.queue_type == "output":
+
                 self.switch_queues[target_host_id - destination_host_list[0].address].appendleft(message)
             else:  # virtual
                 self.switch_queues[message.src_address][message.dst_address - len(self.switch_queues)].appendleft(
@@ -132,11 +133,13 @@ class Switch:
                                           message.message_size, message.start_time, message.message_type)
 
             if self.queue_type == "input":
-                self.switch_queues[message.src_address].appendleft(new_message)
+                self.switch_queues[new_message.src_address].appendleft(new_message)
             elif self.queue_type == "output":
-                self.switch_queues[message.dst_address - destination_host_list[0].address].appendleft(new_message)
+                if new_message.dst_address != message.dst_address:
+                    print(f'new message destination: {new_message.dst_address} inserting to queue to dest host: {new_message}')
+                self.switch_queues[new_message.dst_address - destination_host_list[0].address].appendleft(new_message)
             else:  # virtual
-                self.switch_queues[message.src_address][dst_host.address - len(self.switch_queues)].appendleft(
+                self.switch_queues[new_message.src_address][dst_host.address - len(self.switch_queues)].appendleft(
                     new_message)
 
     def receive_message_from_switch(self, message, link, host_list, link_list, print_flag=False, start_time=0):
@@ -171,7 +174,12 @@ class Switch:
                     curr_link.time_sent = curr_time
 
                 else:  # link is busy
-                    self.switch_queues[curr_message.src_address].insert(0, curr_message)
+                    if self.switch_queues == 'input':
+                        self.switch_queues[curr_message.src_address].insert(0, curr_message)
+                    elif self.queue_type == 'output':
+                        self.switch_queues[curr_message.dst_address - host_list[0].address].insert(0, curr_message)
+                    else:  # virtual
+                        self.switch_queues[curr_message.src_address][curr_message.dst_address - len(self.switch_queues)].insert(0, curr_message)
                     return -1
 
         else:  # dst host is known to switch
