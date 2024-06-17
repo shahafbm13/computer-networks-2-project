@@ -135,8 +135,6 @@ class Switch:
             if self.queue_type == "input":
                 self.switch_queues[new_message.src_address].appendleft(new_message)
             elif self.queue_type == "output":
-                if new_message.dst_address != message.dst_address:
-                    print(f'new message destination: {new_message.dst_address} inserting to queue to dest host: {new_message}')
                 self.switch_queues[new_message.dst_address - destination_host_list[0].address].appendleft(new_message)
             else:  # virtual
                 self.switch_queues[new_message.src_address][dst_host.address - len(self.switch_queues)].appendleft(

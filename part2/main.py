@@ -15,7 +15,7 @@ destination_host_list = []
 hol_stats = []
 
 total_id = 0
-print_flag = True
+print_flag = False
 time_limit = False
 hol_print = True
 
@@ -744,6 +744,7 @@ def send_rest_of_buffers_and_queues():
                     if len(curr_link.host1.host_buffer) > 0:
                         curr_link.host1.host_buffer.pop(0)
                     messages_in_switches = True
+    return last_sent_time
 
 
 def find_last_sent_time():
@@ -754,7 +755,7 @@ def find_last_sent_time():
     return last_message_sent_time
 
 
-def simulation_end_part_2(number_of_packets,queue_type):
+def simulation_end_part_2(number_of_packets,queue_type,last_sent_time):
     if print_flag:
         print("\nSimulation ended, printing stats:\n")
         if number_of_packets <= 10:
@@ -772,8 +773,9 @@ def simulation_end_part_2(number_of_packets,queue_type):
                 last_message_sent_time = link.time_sent
         for switch in switch_list:
             print(f'Queue type: {queue_type.capitalize()}')
-            print(f"\nTotal HoL blocking times for switch {switch.address}: {switch.total_hol_time} "
-                  f"which is {(switch.total_hol_time / (last_message_sent_time) * 100)} % of the total time.")
+            print(f'Simulation ended after {last_message_sent_time} seconds in simulation time.')
+            print(f"Total HoL blocking times for switch {switch.address}: {switch.total_hol_time} "
+                  f"which is {(switch.total_hol_time / (last_message_sent_time) * 100)} % of the total time.\n\n")
 
 def init_new_queue_type(queue_type):
     update_switch_types(queue_type)
@@ -804,7 +806,7 @@ def update_hosts():
 
 def main():
     # choice = input("Enter Question Number for simulation (A/B1/B2):  ").upper()
-    number_of_packets = int(input("Enter number of packets to simulate per host: "))
+    number_of_packets = int(input("Enter number of packets to simulate per host: \n"))
 
     queue_type = ['input','output','virtual']
     # queue_type = ['output']
@@ -820,12 +822,13 @@ def main():
     create_main_timeline_part_2(main_timeline, number_of_packets)
     start_time = time.time()
     for queue_type in queue_type:
+        print(f'Starting simulation with queue type: {queue_type.capitalize()}\n')
         if queue_type != 'input':
             init_new_queue_type(queue_type)
         run_main_timeline_part_2(main_timeline, start_time)
-        send_rest_of_buffers_and_queues()
+        last_sent_time = send_rest_of_buffers_and_queues()
 
-        simulation_end_part_2(hol_print,queue_type)
+        simulation_end_part_2(hol_print,queue_type,last_sent_time)
         # for host in source_host_list:
         #     print(f'host {host.address} has {len(host.host_buffer)} messages in buffer')
 
