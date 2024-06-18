@@ -590,26 +590,6 @@ def run_main_timeline_part_2(main_timeline, start_time):
 
                     else:
                         switch.start_hol_blocking(first_message_to_send, first_queue, event.schedule_time)
-            # elif switch.queue_type == "output":
-            #     first_message_to_send = None
-            #     first_queue = None
-            #     for queue in switch.switch_queues:
-            #         if len(queue) != 0:
-            #             top_of_queue = queue[-1]
-            #             if first_message_to_send is None or top_of_queue.schedule_time < first_message_to_send.schedule_time:
-            #                 first_message_to_send = top_of_queue
-            #                 first_queue = queue
-            #     if first_message_to_send is not None:
-            #         curr_link = [link for link in link_list
-            #                      if link.host1.address == first_message_to_send.dst_address][0]
-            #         if not curr_link.is_link_busy(event.schedule_time, first_message_to_send.message_size):
-            #             first_message_to_send = first_queue.pop()
-            #             curr_link.send_message_from_switch_part_2(first_message_to_send, curr_link.host1, print_flag,
-            #                                                       event.schedule_time)
-            #             curr_link.time_sent = event.schedule_time
-            #             switch.calc_hol_blocking(first_message_to_send, first_queue, event.schedule_time)
-            #         else:
-            #             switch.start_hol_blocking(first_message_to_send, first_queue, event.schedule_time)
 
             elif switch.queue_type == "virtual":
                 first_message_to_send = None
@@ -647,7 +627,7 @@ def run_main_timeline_part_2(main_timeline, start_time):
             scheduling_host.host_buffer.append(message)
             if not curr_link.is_link_busy(event.schedule_time, message.message_size):
                 queued_message = scheduling_host.host_buffer.pop(0)
-                curr_link.send_message_to_switch_part_2(queued_message, curr_link.host2, destination_host_list,
+                curr_link.send_message_to_switch_part_2(queued_message, target_switch, destination_host_list,
                                                         switch_list, link_list, print_flag, event.schedule_time)
                 curr_link.time_sent = event.schedule_time
 
@@ -736,7 +716,7 @@ def send_rest_of_buffers_and_queues():
                              link.host1.address == earliest_message_from_buffers.src_address][0]
                 last_sent_time += curr_link.prop_delay + (
                         earliest_message_from_buffers.message_size / curr_link.transmission_rate)
-                if not curr_link.is_link_busy(time.time(), earliest_message_from_buffers.message_size):
+                if not curr_link.is_link_busy(last_sent_time, earliest_message_from_buffers.message_size):
                     curr_link.send_message_to_switch_part_2(earliest_message_from_buffers, curr_link.host2,
                                                             destination_host_list, switch_list, link_list, print_flag,
                                                             time.time())

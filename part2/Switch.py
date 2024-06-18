@@ -115,7 +115,6 @@ class Switch:
         answer = self.add_to_table(message.src_address, link, message, link_list, print_flag=print_flag,
                                    curr_time=curr_time)
         if answer == "flood":
-            # IMPLEMENT QUEUE TYPE
             self.flooding_part_2(destination_host_list, message, curr_time=curr_time)
         else:  # dst host is known to switch
             if self.queue_type == "input":
@@ -229,13 +228,14 @@ class Switch:
     def calc_hol_blocking(self, blocking_message, blocked_queue, curr_time):
         if self.queue_type == "input" or self.queue_type == "output":
             blocked_queue_number = self.switch_queues.index(blocked_queue)
-            if self.hol_blockers[blocked_queue_number] != [0, 0]:
+            if self.hol_blockers[blocked_queue_number] != [0, 0] and self.hol_blockers[blocked_queue_number][0] != blocking_message:
                 self.total_hol_time += curr_time - self.hol_blockers[blocked_queue_number][1]
                 self.hol_blockers[blocked_queue_number] = [0, 0]
         else:  # virtual
             blocked_queue_input_number = blocking_message.src_address
             blocked_queue_output_number = blocking_message.dst_address - len(self.switch_queues)
-            if self.hol_blockers[blocked_queue_input_number][blocked_queue_output_number] != [0, 0]:
+            if self.hol_blockers[blocked_queue_input_number][blocked_queue_output_number] != [0, 0] \
+                and self.hol_blockers[blocked_queue_input_number][blocked_queue_output_number][0] != blocking_message:
                 self.total_hol_time += curr_time - \
                                        self.hol_blockers[blocked_queue_input_number][blocked_queue_output_number][1]
                 self.hol_blockers[blocked_queue_input_number][blocked_queue_output_number] = [0, 0]
