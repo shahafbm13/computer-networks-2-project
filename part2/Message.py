@@ -1,12 +1,12 @@
 class Message:
-    def __init__(self, message_id, src_address, dst_address, message_size,
+    def __init__(self, message_id, src_address, dst_address, message_size,schedule_time,
                  start_time, message_type="Data"):
         self.message_id = message_id
         self.message_type = message_type
         self.src_address = src_address
         self.dst_address = dst_address
         self.message_size = message_size
-        self.schedule_time = 0
+        self.schedule_time = schedule_time
         self.Mac_time = 0
         self.start_time = start_time
 

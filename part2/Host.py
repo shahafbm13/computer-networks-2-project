@@ -26,8 +26,8 @@ class Host:
                        message_id, schedule_time, start_time, print_flag=False):
 
         message = Message.Message(message_id, src_address, dest_address,
-                                  message_size, start_time)
-        message.schedule_time = schedule_time
+                                  message_size,schedule_time, start_time)
+
         self.total_sent += message.message_size
         self.packets_sent += 1
         if print_flag:
@@ -48,7 +48,7 @@ class Host:
                 del message
 
     def create_timeline(self, number_of_packets):
-        timeline = np.random.exponential(1/1000, size=number_of_packets)
+        timeline = np.random.exponential(1/100, size=number_of_packets)
         self.timeline = np.cumsum(timeline)
 
     def create_events(self, object_id, destination_host_list):
